@@ -1,20 +1,27 @@
 package d5.solitaire;
 
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.Scanner;
 import io.vavr.Tuple2;
 
 public class Main {
 
     public static void main(String[] args) {
+        game(new Random(), System.in, System.out);
+    }
+    
+    public static void game(Random random, InputStream in, PrintStream out) {
         // 初期化
         var set = new ArrayList<Integer>(); // トランプ一組、手札
         for (int i = 0; i < 13 * 4; i++) {
             set.add(i);
         }
-        Collections.shuffle(set); // トランプをシャッフル
+        Collections.shuffle(set, random); // トランプをシャッフル
         var lines = new ArrayList<List<Tuple2<Integer, Boolean>>>(); // レーン7組
         for (int i = 0; i < 7; i++) {
             var line = new ArrayList<Tuple2<Integer, Boolean>>();
@@ -29,38 +36,38 @@ public class Main {
             goals.add(goal);
         }
         int index = 0; // 手札のindex
-        try (var scanner = new Scanner(System.in)) {
+        try (var scanner = new Scanner(in)) {
         while (true) {
             // 表示
             for (int i = 0; i < 7; i++) {
                 var line = lines.get(i);
-                System.out.print("レーン" + i + ":");
+                out.print("レーン" + i + ":");
                 for (int j = 0; j < line.size(); j++) {
                     var card = line.get(j);
                     if (card._2) {
-                        System.out.print(suit(card._1) + number(card._1));
+                        out.print(suit(card._1) + number(card._1));
                     } else {
-                        System.out.print("★");
+                        out.print("★");
                     }
                 }
-                System.out.println();
+                out.println();
             }
             for (int i = 0; i < 4; i++) {
                 var goal = goals.get(i);
-                System.out.println("ゴール" + suit2(i) + ":" + (goal.size() == 0 ? "-" : goal.size()));
+                out.println("ゴール" + suit2(i) + ":" + (goal.size() == 0 ? "-" : goal.size()));
             }
             var card = set.isEmpty() ? null : set.get(index);
-            System.out.println("手札トップ:" + (card == null ? "無し" : (suit(card) + number(card))));
+            out.println("手札トップ:" + (card == null ? "無し" : (suit(card) + number(card))));
             // 入力、処理
-            System.out.print("どうしますか？(操作対象のレーン。手札の場合は7）:");
+            out.print("どうしますか？(操作対象のレーン。手札の場合は7）:");
                 var command = scanner.next();
                 var commandNum = Integer.parseInt(command);
                 if (commandNum <= 6) {
-                    System.out.print("レーン" + commandNum + "をどうしますか？(操作対象のレーン。ゴールの場合は7）:");
+                    out.print("レーン" + commandNum + "をどうしますか？(操作対象のレーン。ゴールの場合は7）:");
                     var command2 = scanner.next();
                     var command2Num = Integer.parseInt(command2);
                     if (command2Num <= 6) {
-                        System.out.println("★:レーン" + commandNum + "からレーン" + command2Num + "への移動");
+                        out.println("★:レーン" + commandNum + "からレーン" + command2Num + "への移動");
                         var line = lines.get(commandNum);
                         var move = line.stream().filter(t -> t._2).findFirst().get();
                         var line2 = lines.get(command2Num);
@@ -98,10 +105,10 @@ public class Main {
                             }
                         }
                         if (!success) {
-                            System.out.println("★★エラー: 移動できません");
+                            out.println("★★エラー: 移動できません");
                         }
                     } else {
-                        System.out.println("★:レーン" + commandNum + "をゴールへ");
+                        out.println("★:レーン" + commandNum + "をゴールへ");
                         var line = lines.get(commandNum);
                         var lineLast = line.get(line.size() - 1);
                         var goal = goals.get(lineLast._1 / 13);
@@ -112,12 +119,12 @@ public class Main {
                                 line.set(line.size() - 1, new Tuple2<>(line.get(line.size() - 1)._1, true));
                             }
                         } else {
-                            System.out.println("★★エラー: 移動できません");
+                            out.println("★★エラー: 移動できません");
                         }
                     }
                 } else {
                     if (card != null) {
-                        System.out.print("手札をどうしますか？(操作対象のレーン。ゴールの場合は7, 繰る場合は8）:");
+                        out.print("手札をどうしますか？(操作対象のレーン。ゴールの場合は7, 繰る場合は8）:");
                         var command2 = scanner.next();
                         var command2Num = Integer.parseInt(command2);
                         if (command2Num <= 6) {
@@ -146,10 +153,10 @@ public class Main {
                                 }
                             }
                             if (!success) {
-                                System.out.println("★★エラー: 移動できません");
+                                out.println("★★エラー: 移動できません");
                             }
                         } else if (command2Num == 7) {
-                            System.out.println("★:手札をゴールへ");
+                            out.println("★:手札をゴールへ");
                             var goal = goals.get(card / 13);
                             if (goal.size() == card % 13) {
                                 goal.add(card);
@@ -158,17 +165,17 @@ public class Main {
                                     index--;
                                 }
                             } else {
-                                System.out.println("★★エラー: 移動できません");
+                                out.println("★★エラー: 移動できません");
                             }
                         } else {
-                            System.out.println("★:手札を繰る");
+                            out.println("★:手札を繰る");
                             index++;
                             if (index >= set.size()) {
                                 index = 0;
                             }
                         }
                     } else {
-                        System.out.println("★★エラー: 手札はありません");
+                        out.println("★★エラー: 手札はありません");
                     }
                 }
             }
