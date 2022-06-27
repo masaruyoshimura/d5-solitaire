@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
+
 import io.vavr.Tuple2;
 
 public class Game {
@@ -17,6 +19,8 @@ public class Game {
     int index; // 手札のindex
     
     String lastMessage; // 最後の操作によるメッセージ
+    
+    Game previous;
 
     public Game(Random random) {
         // 初期化
@@ -41,12 +45,13 @@ public class Game {
         index = 0; // 手札のindex
     }
     
-    private Game(List<Integer> set, List<List<Tuple2<Integer, Boolean>>> lines,List<List<Integer>> goals, int index, String lastMessage) {
+    private Game(List<Integer> set, List<List<Tuple2<Integer, Boolean>>> lines,List<List<Integer>> goals, int index, String lastMessage, Game previous) {
         this.set = set;
         this.lines = lines;
         this.goals = goals;
         this.index = index;
         this.lastMessage = lastMessage; 
+        this.previous = previous;
     }
 
     public String display() {
@@ -77,8 +82,8 @@ public class Game {
 
     public Game step(int commandNum, int command2Num) {
         List<Integer> set = new ArrayList<>(this.set);
-        List<List<Tuple2<Integer, Boolean>>> lines = new ArrayList<>(this.lines);
-        List<List<Integer>> goals = new ArrayList<>(this.goals);
+        List<List<Tuple2<Integer, Boolean>>> lines = deepCopy(this.lines);
+        List<List<Integer>> goals = deepCopy(this.goals);
         int index = this.index;
         String lastMessage = this.lastMessage;
 
@@ -205,11 +210,15 @@ public class Game {
             }
         }
         lastMessage = ret.toString();
-        return new Game(set, lines, goals, index,lastMessage);
+        return new Game(set, lines, goals, index,lastMessage, this);
     }
     
     public String lastMessage() {
         return lastMessage;
+    }
+    
+    public Game undo() {
+        return previous == null ? this : previous;
     }
 
     // スートの文字列に変換
@@ -246,5 +255,9 @@ public class Game {
         if (ret == 1)
             return "A";
         return "" + ret;
+    }
+    
+    private static final <T> List<List<T>> deepCopy(List<List<T>> list) {
+        return new ArrayList<>(list.stream().map(element -> new ArrayList<>(element)).collect(Collectors.toList()));
     }
 }

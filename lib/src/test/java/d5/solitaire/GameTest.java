@@ -28,6 +28,25 @@ public class GameTest {
     
 
     @Test
+    public void test初期状態からundoしても何も起こらない() {
+        var game = new Game(new Random(0)).undo();
+        var actual = game.display();
+        assertEquals(""
+            + "レーン0:♢9\r\n"
+            + "レーン1:★♣K\r\n"
+            + "レーン2:★★♢5\r\n"
+            + "レーン3:★★★♠6\r\n"
+            + "レーン4:★★★★♡6\r\n"
+            + "レーン5:★★★★★♡Q\r\n"
+            + "レーン6:★★★★★★♢2\r\n"
+            + "ゴール♠:-\r\n"
+            + "ゴール♣:-\r\n"
+            + "ゴール♡:-\r\n"
+            + "ゴール♢:-\r\n"
+            + "手札トップ:♣7", actual);
+    }
+    
+    @Test
     public void testレーンからレーンの移動() {
         var game = new Game(new Random(0))
                 .step(5, 1);
@@ -50,6 +69,28 @@ public class GameTest {
     }
     
 
+    @Test
+    public void test移動後にundo() {
+        var game = new Game(new Random(0))
+                .step(5, 1)
+                .undo();
+        String actual = game.lastMessage();
+        assertEquals(null, actual);
+        var actual2 = game.display();
+        assertEquals(""
+                + "レーン0:♢9\r\n"
+                + "レーン1:★♣K\r\n"
+                + "レーン2:★★♢5\r\n"
+                + "レーン3:★★★♠6\r\n"
+                + "レーン4:★★★★♡6\r\n"
+                + "レーン5:★★★★★♡Q\r\n"
+                + "レーン6:★★★★★★♢2\r\n"
+                + "ゴール♠:-\r\n"
+                + "ゴール♣:-\r\n"
+                + "ゴール♡:-\r\n"
+                + "ゴール♢:-\r\n"
+                + "手札トップ:♣7", actual2);
+    }
     @Test
     public void test手札からゴールへの移動() {
         var game = new Game(new Random(0))
