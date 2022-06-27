@@ -17,12 +17,12 @@ public class Main {
                     System.out.print("レーン" + commandNum + "をどうしますか？(操作対象のレーン。ゴールの場合は7）:");
                     var command2 = scanner.next();
                     var command2Num = Integer.parseInt(command2);
-                    game.step(commandNum, command2Num);
+                    game = game.step(commandNum, command2Num);
                 } else {
                     System.out.print("手札をどうしますか？(操作対象のレーン。ゴールの場合は7, 繰る場合は8）:");
                     var command2 = scanner.next();
                     var command2Num = Integer.parseInt(command2);
-                    game.step(commandNum, command2Num);
+                    game = game.step(commandNum, command2Num);
                 }
             }
         }

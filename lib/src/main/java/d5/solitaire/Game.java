@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.Scanner;
 import io.vavr.Tuple2;
 
 public class Game {
@@ -16,6 +15,8 @@ public class Game {
     List<List<Integer>> goals; // ゴール4組
 
     int index; // 手札のindex
+    
+    String lastMessage; // 最後の操作によるメッセージ
 
     public Game(Random random) {
         // 初期化
@@ -38,6 +39,14 @@ public class Game {
             goals.add(goal);
         }
         index = 0; // 手札のindex
+    }
+    
+    private Game(List<Integer> set, List<List<Tuple2<Integer, Boolean>>> lines,List<List<Integer>> goals, int index, String lastMessage) {
+        this.set = set;
+        this.lines = lines;
+        this.goals = goals;
+        this.index = index;
+        this.lastMessage = lastMessage; 
     }
 
     public String display() {
@@ -66,7 +75,13 @@ public class Game {
         return ret.toString();
     }
 
-    public String step(int commandNum, int command2Num) {
+    public Game step(int commandNum, int command2Num) {
+        List<Integer> set = new ArrayList<>(this.set);
+        List<List<Tuple2<Integer, Boolean>>> lines = new ArrayList<>(this.lines);
+        List<List<Integer>> goals = new ArrayList<>(this.goals);
+        int index = this.index;
+        String lastMessage = this.lastMessage;
+
         StringBuilder ret = new StringBuilder();
         var card = set.isEmpty() ? null : set.get(index);
         // 入力、処理
@@ -189,7 +204,12 @@ public class Game {
                 ret.append("\r\n");
             }
         }
-        return ret.toString();
+        lastMessage = ret.toString();
+        return new Game(set, lines, goals, index,lastMessage);
+    }
+    
+    public String lastMessage() {
+        return lastMessage;
     }
 
     // スートの文字列に変換
