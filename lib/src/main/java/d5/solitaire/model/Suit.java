@@ -1,8 +1,7 @@
 package d5.solitaire.model;
 
-import javax.annotation.Nonnull;
-
 import lombok.Getter;
+import lombok.NonNull;
 
 public enum Suit {
 
@@ -13,7 +12,7 @@ public enum Suit {
 	@Getter
 	private String color;
 
-	private Suit(@Nonnull String label, @Nonnull String color) {
+	private Suit(@NonNull String label, @NonNull String color) {
 		this.label = label;
 		this.color = color;
 	}

@@ -29,6 +29,6 @@ class CardNumberTest {
 	
 	@Test
 	void testファクトリメソッド_null() {
-		assertThrows(NoSuchElementException.class, () -> CardNumber.of(null));
+		assertThrows(NullPointerException.class, () -> CardNumber.of(null));
 	}
 }

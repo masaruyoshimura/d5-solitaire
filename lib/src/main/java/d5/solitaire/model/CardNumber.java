@@ -2,9 +2,8 @@ package d5.solitaire.model;
 
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
-
 import lombok.Getter;
+import lombok.NonNull;
 
 public enum CardNumber {
 
@@ -27,12 +26,12 @@ public enum CardNumber {
 	@Getter
 	private String label;
 
-	private CardNumber(@Nonnull Integer number, @Nonnull String label) {
+	private CardNumber(@NonNull Integer number, @NonNull String label) {
 		this.number = number;
 		this.label = label;
 	}
 
-	public static CardNumber of(@Nonnull Integer number) {
+	public static CardNumber of(@NonNull Integer number) {
 		return Stream.of(values()).filter(numberLabel -> numberLabel.getNumber().equals(number)).findFirst().get();
 	}
 }
