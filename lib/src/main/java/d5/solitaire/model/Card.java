@@ -7,9 +7,9 @@ import lombok.ToString;
 @ToString
 @EqualsAndHashCode
 public class Card {
-	private CardNumber number;
+	private final CardNumber number;
 
-	private Suit suit;
+	private final Suit suit;
 
 	private Card(@NonNull CardNumber number, @NonNull Suit suit) {
 		super();
