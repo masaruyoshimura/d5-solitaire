@@ -24,6 +24,7 @@ public class GameTest {
             + "ゴール♡:-\r\n"
             + "ゴール♢:-\r\n"
             + "手札トップ:♣7", actual);
+        assertEquals(null, game.lastMessage());
     }
     
 
@@ -44,6 +45,7 @@ public class GameTest {
             + "ゴール♡:-\r\n"
             + "ゴール♢:-\r\n"
             + "手札トップ:♣7", actual);
+        assertEquals(null, game.lastMessage());
     }
     
     @Test
