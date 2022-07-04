@@ -17,14 +17,24 @@ public class Main {
                     System.out.print("レーン" + commandNum + "をどうしますか？(操作対象のレーン。ゴールの場合は7）:");
                     var command2 = scanner.next();
                     var command2Num = Integer.parseInt(command2);
-                    game = game.step(commandNum, command2Num);
+                    if (command2Num <= 6) {
+                        game = game.moveFromLaneToLane(commandNum, command2Num);
+                    } else {
+                        game = game.moveFromLaneToGoal(commandNum);
+                    }
                 } else if (commandNum == 8) {
                     game = game.undo();
                 } else {
                     System.out.print("手札をどうしますか？(操作対象のレーン。ゴールの場合は7, 繰る場合は8）:");
                     var command2 = scanner.next();
                     var command2Num = Integer.parseInt(command2);
-                    game = game.step(commandNum, command2Num);
+                    if (command2Num <= 6) {
+                        game = game.moveFromHandToLane(command2Num);
+                    } else if (command2Num == 7){
+                        game = game.moveFromHandToGoal();
+                    } else {
+                        game = game.rollHand();
+                    }
                 }
             }
         }

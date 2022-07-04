@@ -49,7 +49,7 @@ public class GameTest {
     @Test
     public void testレーンからレーンの移動() {
         var game = new Game(new Random(0))
-                .step(5, 1);
+                .moveFromLaneToLane(5, 1);
         String actual = game.lastMessage();
         assertEquals("★:レーン5からレーン1への移動\r\n", actual);
         var actual2 = game.display();
@@ -72,7 +72,7 @@ public class GameTest {
     @Test
     public void test移動後にundo() {
         var game = new Game(new Random(0))
-                .step(5, 1)
+                .moveFromLaneToLane(5, 1)
                 .undo();
         String actual = game.lastMessage();
         assertEquals(null, actual);
@@ -94,18 +94,18 @@ public class GameTest {
     @Test
     public void test手札からゴールへの移動() {
         var game = new Game(new Random(0))
-            .step(5, 1)
-            .step(5, 0)
-            .step(2, 3)
-            .step(2, 5)
-            .step(6, 5)
-            .step(7, 8)
-            .step(7, 8)
-            .step(7, 8)
-            .step(7, 8)
-            .step(7, 8)
-            .step(7, 3)
-            .step(7, 7);
+            .moveFromLaneToLane(5, 1)
+            .moveFromLaneToLane(5, 0)
+            .moveFromLaneToLane(2, 3)
+            .moveFromLaneToLane(2, 5)
+            .moveFromLaneToLane(6, 5)
+            .rollHand()
+            .rollHand()
+            .rollHand()
+            .rollHand()
+            .rollHand()
+            .moveFromHandToLane(3)
+            .moveFromHandToGoal();
         String actual = game.lastMessage();
         assertEquals("★:手札をゴールへ\r\n", actual);
         var actual2 = game.display();
