@@ -80,139 +80,174 @@ public class Game {
         return ret.toString();
     }
 
-    public Game step(int commandNum, int command2Num) {
+    public Game moveFromLaneToLane(int commandNum, int command2Num) {
+        List<List<Tuple2<Integer, Boolean>>> lines = deepCopy(this.lines);
+        String lastMessage = this.lastMessage;
+
+        StringBuilder ret = new StringBuilder();
+        ret.append("★:レーン" + commandNum + "からレーン" + command2Num + "への移動");
+        ret.append("\r\n");
+        var line = lines.get(commandNum);
+        var move = line.stream().filter(t -> t._2).findFirst().get();
+        var line2 = lines.get(command2Num);
+        boolean success = false;
+        if (line2.isEmpty()) { // 空列に移動できるのは K
+            if (move._1 % 13 == 12) { // K
+                for (int i = 0; i < line.size(); i++) {
+                    if (line.get(i) == move) {
+                        line2.addAll(line.subList(i, line.size()));
+                        line.removeAll(line.subList(i, line.size()));
+                        if (!line.isEmpty()) {
+                            line.set(line.size() - 1, new Tuple2<>(line.get(line.size() - 1)._1, true));
+                        }
+                        success = true;
+                        break;
+                    }
+                }
+            }
+        } else { // 空列以外に移動できるのは色違い連番
+            // TODO lineの最前(move)からの移動だけでなく、途中からの移動にも対応する
+            var line2Last = line2.get(line2.size() - 1);
+            if ((line2Last._1.intValue() % 13) == (move._1.intValue() % 13) + 1
+                && (((move._1.intValue() / 26 + 1) + (line2Last._1.intValue() / 26 + 1)) == 0b11)) {
+                for (int i = 0; i < line.size(); i++) {
+                    if (line.get(i) == move) {
+                        line2.addAll(line.subList(i, line.size()));
+                        line.removeAll(line.subList(i, line.size()));
+                        if (!line.isEmpty()) {
+                            line.set(line.size() - 1, new Tuple2<>(line.get(line.size() - 1)._1, true));
+                        }
+                        success = true;
+                        break;
+                    }
+                }
+            }
+        }
+        if (!success) {
+            ret.append("★★エラー: 移動できません");
+            ret.append("\r\n");
+        }
+        lastMessage = ret.toString();
+        return new Game(this.set, lines, this.goals, this.index, lastMessage, this);
+    }
+    
+    public Game moveFromLaneToGoal(int commandNum) {
+        List<List<Tuple2<Integer, Boolean>>> lines = deepCopy(this.lines);
+        List<List<Integer>> goals = deepCopy(this.goals);
+        String lastMessage = this.lastMessage;
+
+        StringBuilder ret = new StringBuilder();
+        ret.append("★:レーン" + commandNum + "をゴールへ");
+        ret.append("\r\n");
+        var line = lines.get(commandNum);
+        var lineLast = line.get(line.size() - 1);
+        var goal = goals.get(lineLast._1 / 13);
+        if (goal.size() == lineLast._1 % 13) {
+            goal.add(lineLast._1);
+            line.remove(line.size() - 1);
+            if (!line.isEmpty()) {
+                line.set(line.size() - 1, new Tuple2<>(line.get(line.size() - 1)._1, true));
+            }
+        } else {
+            ret.append("★★エラー: 移動できません");
+            ret.append("\r\n");
+        }
+        lastMessage = ret.toString();
+        return new Game(this.set, lines, goals, this.index, lastMessage, this);
+    }
+    
+
+    public Game moveFromHandToLane(int command2Num) {
         List<Integer> set = new ArrayList<>(this.set);
         List<List<Tuple2<Integer, Boolean>>> lines = deepCopy(this.lines);
+        int index = this.index;
+        String lastMessage = this.lastMessage;
+
+        StringBuilder ret = new StringBuilder();
+        var card = set.isEmpty() ? null : set.get(index);
+        if (card != null) {
+            var line2 = lines.get(command2Num);
+            boolean success = false;
+            if (line2.isEmpty()) { // 空列に移動できるのは K
+                if (card % 13 == 12) { // K
+                    line2.add(new Tuple2<>(card, true));
+                    set.remove(index);
+                    if (index >= set.size()) {
+                        index--;
+                    }
+                    success = true;
+                }
+            } else { // 空列以外に移動できるのは色違い連番
+                var line2Last = line2.get(line2.size() - 1);
+                if ((line2Last._1.intValue() % 13) == (card.intValue() % 13) + 1
+                    && (((card.intValue() / 26 + 1)
+                        + (line2Last._1.intValue() / 26 + 1)) == 0b11)) {
+                    line2.add(new Tuple2<>(card, true));
+                    set.remove(index);
+                    if (index >= set.size()) {
+                        index--;
+                    }
+                    success = true;
+                }
+            }
+            if (!success) {
+                ret.append("★★エラー: 移動できません");
+                ret.append("\r\n");
+            }
+        } else {
+            ret.append("★★エラー: 手札はありません");
+            ret.append("\r\n");
+        }
+        lastMessage = ret.toString();
+        return new Game(set, lines, this.goals, index,lastMessage, this);
+    }
+    
+
+    public Game moveFromHandToGoal() {
+        List<Integer> set = new ArrayList<>(this.set);
         List<List<Integer>> goals = deepCopy(this.goals);
         int index = this.index;
         String lastMessage = this.lastMessage;
 
         StringBuilder ret = new StringBuilder();
         var card = set.isEmpty() ? null : set.get(index);
-        // 入力、処理
-        if (commandNum <= 6) {
-            if (command2Num <= 6) {
-                ret.append("★:レーン" + commandNum + "からレーン" + command2Num + "への移動");
-                ret.append("\r\n");
-                var line = lines.get(commandNum);
-                var move = line.stream().filter(t -> t._2).findFirst().get();
-                var line2 = lines.get(command2Num);
-                boolean success = false;
-                if (line2.isEmpty()) { // 空列に移動できるのは K
-                    if (move._1 % 13 == 12) { // K
-                        for (int i = 0; i < line.size(); i++) {
-                            if (line.get(i) == move) {
-                                line2.addAll(line.subList(i, line.size()));
-                                line.removeAll(line.subList(i, line.size()));
-                                if (!line.isEmpty()) {
-                                    line.set(line.size() - 1, new Tuple2<>(line.get(line.size() - 1)._1, true));
-                                }
-                                success = true;
-                                break;
-                            }
-                        }
-                    }
-                } else { // 空列以外に移動できるのは色違い連番
-                    // TODO lineの最前(move)からの移動だけでなく、途中からの移動にも対応する
-                    var line2Last = line2.get(line2.size() - 1);
-                    if ((line2Last._1.intValue() % 13) == (move._1.intValue() % 13) + 1
-                        && (((move._1.intValue() / 26 + 1) + (line2Last._1.intValue() / 26 + 1)) == 0b11)) {
-                        for (int i = 0; i < line.size(); i++) {
-                            if (line.get(i) == move) {
-                                line2.addAll(line.subList(i, line.size()));
-                                line.removeAll(line.subList(i, line.size()));
-                                if (!line.isEmpty()) {
-                                    line.set(line.size() - 1, new Tuple2<>(line.get(line.size() - 1)._1, true));
-                                }
-                                success = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-                if (!success) {
-                    ret.append("★★エラー: 移動できません");
-                    ret.append("\r\n");
+        if (card != null) {
+            ret.append("★:手札をゴールへ");
+            ret.append("\r\n");
+            var goal = goals.get(card / 13);
+            if (goal.size() == card % 13) {
+                goal.add(card);
+                set.remove(index);
+                if (index >= set.size()) {
+                    index--;
                 }
             } else {
-                ret.append("★:レーン" + commandNum + "をゴールへ");
+                ret.append("★★エラー: 移動できません");
                 ret.append("\r\n");
-                var line = lines.get(commandNum);
-                var lineLast = line.get(line.size() - 1);
-                var goal = goals.get(lineLast._1 / 13);
-                if (goal.size() == lineLast._1 % 13) {
-                    goal.add(lineLast._1);
-                    line.remove(line.size() - 1);
-                    if (!line.isEmpty()) {
-                        line.set(line.size() - 1, new Tuple2<>(line.get(line.size() - 1)._1, true));
-                    }
-                } else {
-                    ret.append("★★エラー: 移動できません");
-                    ret.append("\r\n");
-                }
             }
         } else {
-            if (card != null) {
-                if (command2Num <= 6) {
-                    var line2 = lines.get(command2Num);
-                    boolean success = false;
-                    if (line2.isEmpty()) { // 空列に移動できるのは K
-                        if (card % 13 == 12) { // K
-                            line2.add(new Tuple2<>(card, true));
-                            set.remove(index);
-                            if (index >= set.size()) {
-                                index--;
-                            }
-                            success = true;
-                        }
-                    } else { // 空列以外に移動できるのは色違い連番
-                        var line2Last = line2.get(line2.size() - 1);
-                        if ((line2Last._1.intValue() % 13) == (card.intValue() % 13) + 1
-                            && (((card.intValue() / 26 + 1)
-                                + (line2Last._1.intValue() / 26 + 1)) == 0b11)) {
-                            line2.add(new Tuple2<>(card, true));
-                            set.remove(index);
-                            if (index >= set.size()) {
-                                index--;
-                            }
-                            success = true;
-                        }
-                    }
-                    if (!success) {
-                        ret.append("★★エラー: 移動できません");
-                        ret.append("\r\n");
-                    }
-                } else if (command2Num == 7) {
-                    ret.append("★:手札をゴールへ");
-                    ret.append("\r\n");
-                    var goal = goals.get(card / 13);
-                    if (goal.size() == card % 13) {
-                        goal.add(card);
-                        set.remove(index);
-                        if (index >= set.size()) {
-                            index--;
-                        }
-                    } else {
-                        ret.append("★★エラー: 移動できません");
-                        ret.append("\r\n");
-                    }
-                } else {
-                    ret.append("★:手札を繰る");
-                    ret.append("\r\n");
-                    index++;
-                    if (index >= set.size()) {
-                        index = 0;
-                    }
-                }
-            } else {
-                ret.append("★★エラー: 手札はありません");
-                ret.append("\r\n");
-            }
+            ret.append("★★エラー: 手札はありません");
+            ret.append("\r\n");
         }
         lastMessage = ret.toString();
-        return new Game(set, lines, goals, index,lastMessage, this);
+        return new Game(set, this.lines, goals, index, lastMessage, this);
     }
-    
+
+    public Game rollHand() {
+        int index = this.index;
+        String lastMessage = this.lastMessage;
+
+        StringBuilder ret = new StringBuilder();
+        ret.append("★:手札を繰る");
+        ret.append("\r\n");
+        index++;
+        if (index >= set.size()) {
+            index = 0;
+        }
+        lastMessage = ret.toString();
+        return new Game(set, lines, goals, index, lastMessage, this);
+    }
+
     public String lastMessage() {
         return lastMessage;
     }
