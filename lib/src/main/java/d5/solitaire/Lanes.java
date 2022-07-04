@@ -26,13 +26,14 @@ public class Lanes {
     }
 
     private Lanes(List<List<Tuple2<Integer, Boolean>>> lanes) {
+        if(lanes == null) throw new IllegalArgumentException("lanes must not be null.");
         this.lanes = lanes;
     }
     
     @Override
     public String toString() {
         StringBuilder ret = new StringBuilder();
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < lanes.size(); i++) {
             var lane = lanes.get(i);
             ret.append("レーン" + i + ":");
             for (int j = 0; j < lane.size(); j++) {
@@ -92,5 +93,12 @@ public class Lanes {
             }
         }
         return this;
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if(!(obj instanceof Lanes)) return false;
+        Lanes other = (Lanes)obj;
+        return other.lanes.equals(lanes);
     }
 }
