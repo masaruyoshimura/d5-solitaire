@@ -66,6 +66,16 @@ public class LanesTest {
                 List.of(fore(2), fore(13*2+1), fore(0)), // ♠3♡2♠A
                 List.of(fore(12)) // ♠K
             ))); // 二枚つながってるものをセットで移動、移動後の裏カードが表になる
+        assertEquals(
+                Lanes.fromLanes(List.of(
+                    List.of(fore(13*2+1), fore(0)), // ♡2♠A
+                    List.of(fore(13*3+1)) // ♢2
+                )).moveFromLaneToLane(0, 1),
+                Lanes.fromLanes(List.of(
+                    List.of(fore(13*2+1)), // ♡2
+                    List.of(fore(13*3+1), fore(0)) // ♢2♠A
+                ))); // laneの途中からの移動（♠Aだけが移動している）
+
     }
 
     @Test
@@ -106,7 +116,6 @@ public class LanesTest {
                 List.of(fore(13*2+1), fore(0)), // ♡2♠A
                 List.of(fore(13*3+1)) // ♢2
             ));
-        assertTrue(lanes.moveFromLaneToLane(0, 1) == lanes); // FIXME laneの途中からの移動に対応していない
     }
 
     // 表
