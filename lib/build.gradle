@@ -1,5 +1,7 @@
 plugins {
     id 'java-library'
+    id "org.dddjava.jig-gradle-plugin" version "2019.12.1"
+    id 'jacoco'
 }
 
 repositories {
@@ -23,4 +25,10 @@ test {
     events 'started', 'skipped', 'passed', 'failed'
     exceptionFormat 'full'
   }
+  
+  finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    dependsOn test
 }
