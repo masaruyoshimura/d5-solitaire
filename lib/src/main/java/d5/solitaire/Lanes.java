@@ -60,9 +60,9 @@ public class Lanes {
     public Lanes moveFromLaneToLane(int commandNum, int command2Num) {
         List<List<Tuple2<Integer, Boolean>>> lanes = deepCopy(this.lanes);
         var lane = lanes.get(commandNum);
-        var move = lane.stream().filter(t -> t._2).findFirst().get();
         var lane2 = lanes.get(command2Num);
         if (lane2.isEmpty()) { // 空列に移動できるのは K
+            var move = lane.stream().filter(t -> t._2).findFirst().get();
             if (move._1 % 13 == 12) { // K
                 for (int i = 0; i < lane.size(); i++) {
                     if (lane.get(i) == move) {
@@ -78,9 +78,11 @@ public class Lanes {
         } else { // 空列以外に移動できるのは色違い連番
             // TODO laneの最前(move)からの移動だけでなく、途中からの移動にも対応する
             var lane2Last = lane2.get(lane2.size() - 1);
-            if ((lane2Last._1.intValue() % 13) == (move._1.intValue() % 13) + 1
-                && (((move._1.intValue() / 26 + 1) + (lane2Last._1.intValue() / 26 + 1)) == 0b11)) {
-                for (int i = 0; i < lane.size(); i++) {
+            for (int i = lane.size()-1; i >= 0; i--) {
+                var move = lane.get(i);
+                if(!move._2) continue; // 裏向きのものは見ない
+                if ((lane2Last._1.intValue() % 13) == (move._1.intValue() % 13) + 1
+                        && (((move._1.intValue() / 26 + 1) + (lane2Last._1.intValue() / 26 + 1)) == 0b11)) {
                     if (lane.get(i) == move) {
                         lane2.addAll(lane.subList(i, lane.size()));
                         lane.removeAll(lane.subList(i, lane.size()));
